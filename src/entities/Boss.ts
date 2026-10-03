@@ -45,9 +45,14 @@ export class Boss extends Enemy {
   onPhaseChange: ((phase: number) => void) | null = null;
   private emberTimer = 0;
 
+  /** Glow cast by the Warden's burning body in phase two (kept in the scene at 0 to avoid shader recompiles). */
+  readonly fireLight = new THREE.PointLight(0xff6a20, 0, 12, 1.6);
+
   constructor(x: number, z: number, yaw: number) {
     super(WARDEN, x, z, yaw, 'warden');
     this.trail.setColor(0xffb070);
+    this.fireLight.position.set(0, 1.4, 0.3);
+    this.rig.root.add(this.fireLight);
   }
 
   respawn(): void {
@@ -57,6 +62,7 @@ export class Boss extends Enemy {
     this.animSpeed = 1;
     this.recent = [];
     this.phaseShiftPending = false;
+    this.fireLight.intensity = 0;
     this.trail.setColor(0xffb070);
     this.setState('rest', 0);
   }
@@ -109,7 +115,10 @@ export class Boss extends Enemy {
   }
 
   protected think(dt: number, ctx: GameContext): void {
-    if (!this.alive) return;
+    if (!this.alive) {
+      this.fireLight.intensity = 0;
+      return;
+    }
     if (!this.active) {
       this.moveVel.set(0, 0, 0);
       return;
@@ -117,6 +126,7 @@ export class Boss extends Enemy {
     this.target = ctx.player.alive ? ctx.player : null;
 
     // Fire effects in phase 2
+    this.fireLight.intensity = this.phase === 2 ? 9 + Math.sin(ctx.time * 17) * 2 + Math.sin(ctx.time * 7) * 2 : 0;
     if (this.phase === 2) {
       this.emberTimer -= dt;
       if (this.emberTimer <= 0) {

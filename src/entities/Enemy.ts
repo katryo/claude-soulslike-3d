@@ -168,8 +168,15 @@ export class Enemy extends Actor {
   protected senses(p: Actor): boolean {
     const d = this.distanceTo(p);
     if (d > this.def.aggroRange) return false;
-    if (d < 4) return true;
+    if (d < 1.6) return true;
+    // Sprinting footsteps are heard from behind.
+    if (d < 6 && (p as { isSprinting?: boolean }).isSprinting) return true;
     return Math.abs(this.angleTo(p.pos)) < 1.2;
+  }
+
+  applyDamage(dmg: number, ctx: GameContext, killer: Actor | null): boolean {
+    if (killer && killer.team !== this.team) this.target = killer;
+    return super.applyDamage(dmg, ctx, killer);
   }
 
   protected think(dt: number, ctx: GameContext): void {

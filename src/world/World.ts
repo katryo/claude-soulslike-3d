@@ -671,8 +671,8 @@ export class World {
           vec2 p = vUv * vec2(3.0, 4.0);
           float f = fbm(p + vec2(uTime*0.15, uTime*0.35)) * fbm(p*1.7 - vec2(uTime*0.1, uTime*0.2));
           float edge = smoothstep(0.0, 0.12, vUv.x) * smoothstep(1.0, 0.88, vUv.x) * smoothstep(1.0, 0.85, vUv.y);
-          float a = (0.25 + f * 1.4) * edge * uOpacity;
-          gl_FragColor = vec4(vec3(0.85, 0.88, 0.95) * a, a);
+          float a = (0.12 + f * 0.9) * edge * uOpacity;
+          gl_FragColor = vec4(vec3(0.75, 0.78, 0.85) * a, a);
         }`,
     });
     const fog = new THREE.Mesh(new THREE.PlaneGeometry(7, 7.5), fogMat);

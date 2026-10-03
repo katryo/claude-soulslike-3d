@@ -452,6 +452,7 @@ export class Game {
 
   private enterMenu(): void {
     this.mode = 'menu';
+    this.hud.setPrompt(null);
     this.input.exitPointerLock();
   }
 
@@ -620,9 +621,16 @@ export class Game {
   // Main loop
   // -------------------------------------------------------------------------
 
+  /** When true the rAF loop stops advancing the game (automated tests drive it manually). */
+  manual = false;
+
   start(): void {
     const loop = () => {
       requestAnimationFrame(loop);
+      if (this.manual) {
+        this.last = performance.now();
+        return;
+      }
       const now = performance.now();
       const dt = Math.min(0.05, (now - this.last) / 1000);
       this.last = now;
@@ -631,8 +639,8 @@ export class Game {
     requestAnimationFrame(loop);
   }
 
-  /** Advance one frame. Exposed for automated testing. */
-  frame(dt: number): void {
+  /** Advance one frame. Exposed for automated testing (pass draw=false to skip rendering). */
+  frame(dt: number, draw = true): void {
     this.time += dt;
     this.fpsAccum += dt;
     this.fpsFrames++;
@@ -699,10 +707,14 @@ export class Game {
         this.fogwalkTimer += dt;
         const p = this.player;
         p.frozen = true;
-        p.pos.z -= dt * 2.2;
+        // Walk through the fog and a few steps into the arena so the camera clears the gate.
+        p.moveVel.set(0, 0, -3.6);
+        p.yaw = Math.PI;
+        p.pos.z -= dt * 3.6;
         this.hud.setPrompt(null);
         this.simulate(sim, false);
-        if (this.fogwalkTimer > 1.4) {
+        if (this.fogwalkTimer > 1.9) {
+          p.moveVel.set(0, 0, 0);
           p.frozen = false;
           this.world.fogGate.collider.enabled = true;
           this.mode = 'play';
@@ -716,7 +728,12 @@ export class Game {
     }
 
     this.updateVictory(dt);
-    this.render(dt);
+    if (draw) this.render(dt);
+    else {
+      this.updateCamera(dt);
+      this.hud.update(dt);
+      if (this.mode !== 'title') this.updateHudWorld(dt);
+    }
     this.input.endFrame();
   }
 
@@ -858,12 +875,20 @@ export class Game {
     }
   }
 
+  private updateCamera(dt: number): void {
+    if (this.mode === 'title') return;
+    const scripted = this.player.state === 'rest' ? { yaw: this.player.yaw + 0.9, pitch: 0.15, dist: 3.6 } : undefined;
+    const look = this.mode === 'play' && this.player.alive ? this.input : null;
+    this.camRig.update(dt, this.player, this.player.target, look, this.world.collision, scripted);
+  }
+
+  /** Run the simulation for `seconds` without rendering (testing helper). */
+  advance(seconds: number, dt = 1 / 60): void {
+    for (let t = 0; t < seconds; t += dt) this.frame(dt, false);
+  }
+
   private render(dt: number): void {
-    if (this.mode !== 'title') {
-      const scripted = this.player.state === 'rest' ? { yaw: this.player.yaw + 0.9, pitch: 0.15, dist: 3.6 } : undefined;
-      const look = this.mode === 'play' && this.player.alive ? this.input : null;
-      this.camRig.update(dt, this.player, this.player.target, look, this.world.collision, scripted);
-    }
+    this.updateCamera(dt);
     this.hud.update(dt);
     if (this.mode !== 'title') this.updateHudWorld(dt);
     this.post.render(this.time);

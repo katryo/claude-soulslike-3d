@@ -98,7 +98,7 @@ html, body {
 
 /* ---- Prompt & dialog ---- */
 .prompt {
-  position: absolute; left: 50%; bottom: 22%; transform: translateX(-50%); opacity: 0; transition: opacity 0.2s;
+  position: absolute; left: 50%; bottom: 31%; transform: translateX(-50%); opacity: 0; transition: opacity 0.2s;
   padding: 10px 40px; font-size: 20px; letter-spacing: 0.02em; white-space: nowrap;
   background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.75) 20%, rgba(0, 0, 0, 0.75) 80%, transparent);
   border-top: 1px solid rgba(216, 184, 120, 0.3); border-bottom: 1px solid rgba(216, 184, 120, 0.3);
@@ -108,7 +108,7 @@ html, body {
   border-radius: 3px; font-family: var(--display); font-size: 15px; text-align: center; color: var(--gold);
 }
 .dialog {
-  position: absolute; left: 50%; bottom: 13%; width: min(720px, 86vw); transform: translate(-50%, 10px);
+  position: absolute; left: 50%; bottom: 19%; width: min(720px, 86vw); transform: translate(-50%, 10px);
   padding: 18px 30px; font-size: 20px; line-height: 1.45; text-align: center; opacity: 0;
   transition: opacity 0.35s, transform 0.35s;
   background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.82) 12%, rgba(0, 0, 0, 0.82) 88%, transparent);

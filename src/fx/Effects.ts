@@ -29,7 +29,7 @@ export class WeaponTrail {
     const mat = new THREE.ShaderMaterial({
       uniforms: { uColor: { value: new THREE.Color(color) } },
       vertexShader: `attribute float aAlpha; varying float vA; void main(){ vA = aAlpha; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
-      fragmentShader: `uniform vec3 uColor; varying float vA; void main(){ gl_FragColor = vec4(uColor * (0.6 + vA), vA * 0.55); }`,
+      fragmentShader: `uniform vec3 uColor; varying float vA; void main(){ gl_FragColor = vec4(uColor * (0.35 + vA * 0.5), vA * 0.32); }`,
       transparent: true,
       depthWrite: false,
       side: THREE.DoubleSide,
