@@ -55,6 +55,8 @@ export class Input {
   private padStickFlick = 0;
   private time = 0;
   pointerLocked = false;
+  /** Ignore mouse buttons until the pointer is captured (disabled by automated tests). */
+  requireLock = true;
 
   constructor(private canvas: HTMLElement) {
     window.addEventListener('keydown', (e) => this.onKey(e, true));
@@ -171,6 +173,8 @@ export class Input {
 
   private onMouse(e: MouseEvent, down: boolean): void {
     this.usingGamepad = false;
+    // The click that captures the mouse should not also swing the sword.
+    if (down && this.requireLock && !this.pointerLocked) return;
     if (down) {
       if (e.button === 0) {
         this.press(this.keys.has('ShiftLeft') || this.keys.has('ShiftRight') ? 'heavy' : 'light');

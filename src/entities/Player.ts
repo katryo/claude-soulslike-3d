@@ -139,6 +139,13 @@ export class Player extends Actor {
           audio.heal();
         }
         break;
+      case 'parry':
+        // Once the parry window has passed, recovery can be cancelled into a riposte or roll.
+        if (this.stateTime > 0.3 && (this.buffered('light') || this.buffered('roll'))) {
+          this.setState('move', 0.06);
+          this.thinkMove(dt, ctx, moveLen);
+        }
+        break;
       default:
         break;
     }

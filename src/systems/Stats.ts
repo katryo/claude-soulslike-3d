@@ -51,5 +51,5 @@ export function blockStaminaCost(dmg: number, heavy: boolean): number {
   return Math.round(dmg * (heavy ? 1.15 : 0.85) + 6);
 }
 
-export const RIPOSTE_MULTIPLIER = 4.2;
+export const RIPOSTE_MULTIPLIER = 4.5;
 export const BACKSTAB_MULTIPLIER = 3.4;
