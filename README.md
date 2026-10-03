@@ -22,6 +22,15 @@ npm run typecheck
 
 Click the title screen to start. The game captures the mouse; press <kbd>Esc</kbd> to pause.
 
+## Deploying to Cloudflare
+
+The game is a static site served by a Cloudflare Worker with static assets (`wrangler.jsonc`).
+
+- **Manual:** set `CLOUDFLARE_API_TOKEN` (a token with the *Edit Cloudflare Workers* permission) and `CLOUDFLARE_ACCOUNT_ID`, then run `npm run deploy`. Or run `npx wrangler login` once and then `npm run deploy`.
+- **Automatic:** add the same two values as repository secrets. `.github/workflows/deploy.yml` then deploys on every push to `main`, and you can also trigger it by hand from the Actions tab.
+
+The site is published at `https://ashen-hollow.<your-subdomain>.workers.dev`.
+
 ## Controls
 
 | Action | Keyboard / mouse | Gamepad |

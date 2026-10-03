@@ -3,13 +3,15 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Ashen Hollow — a third-person 3D soulslike action game for the browser, built with Three.js.",
+  "description": "Ashen Hollow \u2014 a third-person 3D soulslike action game for the browser, built with Three.js.",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "deploy": "npm run build && wrangler deploy",
+    "preview:cf": "npm run build && wrangler dev"
   },
   "dependencies": {
     "three": "^0.186.1"
@@ -18,6 +20,7 @@
     "@types/three": "^0.186.0",
     "typescript": "^5.9.3",
     "vite": "^8.3.2",
-    "vitest": "^5.0.3"
+    "vitest": "^5.0.3",
+    "wrangler": "^4.147.0"
   }
 }
