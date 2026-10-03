@@ -48,6 +48,7 @@ export class HUD {
   private menu: HTMLDivElement;
   private vignette: HTMLDivElement;
   private fade: HTMLDivElement;
+  private hint: HTMLDivElement;
   private enemyBars = new Map<object, EnemyBar>();
   private shownSouls = 0;
   private targetSouls = 0;
@@ -96,6 +97,7 @@ export class HUD {
     this.dialog = el('div', 'dialog', this.root);
     this.menu = el('div', 'menu', this.root);
     this.fade = el('div', 'fade', this.root);
+    this.hint = el('div', 'hint', this.root, 'Click to control the camera');
     this.title = el('div', 'title-screen', parent);
     this.title.innerHTML = `
       <div class="title-inner">
@@ -207,6 +209,10 @@ export class HUD {
   hideDialog(): void {
     this.dialog.classList.remove('show');
     this.dialogTimer = 0;
+  }
+
+  setHint(show: boolean): void {
+    this.hint.style.opacity = show ? '1' : '0';
   }
 
   setFade(v: number): void {

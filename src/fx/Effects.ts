@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { ParticlePool } from './Particles';
+import { getGlowTexture } from '../world/Textures';
 
 const TRAIL_SAMPLES = 14;
 
@@ -120,7 +121,7 @@ export class Effects {
     }
     const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-    const m = new THREE.PointsMaterial({ color: 0xb8aea0, size: 0.05, transparent: true, opacity: 0.55, depthWrite: false });
+    const m = new THREE.PointsMaterial({ color: 0xb8aea0, size: 0.06, map: getGlowTexture(), transparent: true, opacity: 0.6, depthWrite: false });
     this.ash = new THREE.Points(g, m);
     this.ash.frustumCulled = false;
     scene.add(this.ash);

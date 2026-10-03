@@ -5,6 +5,24 @@ import type { RigStyle } from '../anim/Rig';
 import type { AttackDef } from '../combat/Attacks';
 import { BRUTE_ATTACKS, HOLLOW_ATTACKS } from '../combat/Attacks';
 import { BRUTE_GUARD } from '../anim/Animations';
+
+/** Sitting slumped on the ground, head bowed. */
+const SLUMP_POSE: Pose = {
+  root: [0, -0.72, -0.1],
+  hips: [-0.2, 0, 0],
+  spine: [0.35, 0, 0.1],
+  chest: [0.25, 0.2, 0],
+  head: [0.7, 0.3, 0.2],
+  lHip: [-1.45, 0, 0.35],
+  lKnee: [1.2, 0, 0],
+  rHip: [-1.2, 0, -0.25],
+  rKnee: [0.5, 0, 0],
+  lShoulder: [-0.2, 0, 0.2],
+  lElbow: [-0.6, 0, 0],
+  rShoulder: [-0.4, 0, -0.25],
+  rElbow: [-0.3, 0, 0],
+  rWrist: [1.2, 0, 0],
+};
 import type { Pose } from '../anim/Pose';
 import { damp, rotateTowards, yawTo } from '../core/math';
 
@@ -122,8 +140,11 @@ export class Enemy extends Actor {
   dissolve = 0;
   awardedSouls = false;
   readonly id: string;
+  /** Slumped against a wall until something disturbs it. */
+  dormant = false;
+  private wakeTimer = 0;
 
-  constructor(readonly def: EnemyDef, x: number, z: number, yaw: number, id: string) {
+  constructor(readonly def: EnemyDef, x: number, z: number, yaw: number, id: string, readonly startsDormant = false) {
     super(def.style);
     this.id = id;
     this.name = def.name;
@@ -142,6 +163,8 @@ export class Enemy extends Actor {
 
   respawn(): void {
     this.reset(this.home.x, this.home.z, this.homeYaw);
+    this.dormant = this.startsDormant;
+    this.wakeTimer = 0;
     this.cooldown = 1;
     this.dissolve = 0;
     this.awardedSouls = false;
@@ -185,6 +208,23 @@ export class Enemy extends Actor {
       return;
     }
     const p = ctx.player;
+    if (this.dormant) {
+      this.moveVel.set(0, 0, 0);
+      // Dormant hollows only stir when the player comes close or strikes them.
+      if (this.target || (p.alive && this.distanceTo(p) < 3.2)) {
+        this.dormant = false;
+        this.wakeTimer = 0.9;
+        this.target = p;
+        this.trans = { from: this.lastPose, t: 0, dur: 0.9 };
+      }
+      return;
+    }
+    if (this.wakeTimer > 0) {
+      this.wakeTimer -= dt;
+      this.moveVel.set(0, 0, 0);
+      this.faceTowards(p.pos.x, p.pos.z, 3 * dt);
+      return;
+    }
     if (!this.target) {
       if (p.alive && this.senses(p)) this.target = p;
     } else if (!this.target.alive || this.pos.distanceTo(this.home) > this.def.leash) {
@@ -215,7 +255,9 @@ export class Enemy extends Actor {
     const to = new THREE.Vector3(t.pos.x - this.pos.x, 0, t.pos.z - this.pos.z).normalize();
     this.yaw = rotateTowards(this.yaw, yawTo(to.x, to.z), 6 * dt);
 
-    if (this.cooldown <= 0 && Math.abs(this.angleTo(t.pos)) < 0.6) {
+    // Only a couple of foes press the attack at once; the rest circle and wait their turn.
+    const attackers = ctx.actors.filter((a) => a !== this && a.team === this.team && a.state === 'attack' && a.target === t).length;
+    if (this.cooldown <= 0 && attackers < 2 && Math.abs(this.angleTo(t.pos)) < 0.6) {
       const id = this.def.choose(dist / this.scale, this);
       if (id && this.attacks[id]) {
         this.moveVel.set(0, 0, 0);
@@ -239,6 +281,11 @@ export class Enemy extends Actor {
       if (dist < engage * 0.6) desired.addScaledVector(to, -this.def.walkSpeed * 0.8);
     }
     this.moveVel.lerp(desired, k);
+  }
+
+  protected evaluatePose(root: THREE.Vector3): Pose {
+    if (this.dormant && this.state === 'move') return SLUMP_POSE;
+    return super.evaluatePose(root);
   }
 
   /** Corpse fade-out handled per frame by the game. Returns true once fully gone. */

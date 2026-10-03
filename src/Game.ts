@@ -59,6 +59,7 @@ export class Game {
   private menuMoveLatch = 0;
   private titleAngle = 0;
   private lastSafe = new THREE.Vector3();
+  private lastPlayerState = '';
   private fpsAccum = 0;
   private fpsFrames = 0;
   fps = 60;
@@ -70,7 +71,7 @@ export class Game {
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.05;
+    this.renderer.toneMappingExposure = 1.2;
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     container.appendChild(this.renderer.domElement);
     this.renderer.domElement.tabIndex = 0;
@@ -92,7 +93,7 @@ export class Game {
     this.player = new Player(this.input);
     this.addActor(this.player);
     for (const [i, s] of this.world.spawns.entries()) {
-      const e = new Enemy(ENEMY_DEFS[s.kind], s.x, s.z, s.yaw, `${s.kind}${i}`);
+      const e = new Enemy(ENEMY_DEFS[s.kind], s.x, s.z, s.yaw, `${s.kind}${i}`, !!s.dormant);
       this.enemies.push(e);
       this.addActor(e);
     }
@@ -764,6 +765,9 @@ export class Game {
       a.update(dt, this.ctx);
     }
     this.separate();
+    // Dust kicked up when the player rolls.
+    if ((p.state === 'roll' || p.state === 'backstep') && p.stateTime < 0.12 && this.lastPlayerState !== p.state) this.fx.dustPuff(p.pos, 10, 0.8);
+    this.lastPlayerState = p.state;
 
     // Keep the player within the level.
     if (this.world.distanceOutsidePlay(p.pos.x, p.pos.z) > 0.6) p.pos.copy(this.lastSafe);
@@ -877,6 +881,11 @@ export class Game {
 
   private updateCamera(dt: number): void {
     if (this.mode === 'title') return;
+    const wantFov = this.player.isSprinting ? 64 : 58;
+    if (Math.abs(this.camera.fov - wantFov) > 0.01) {
+      this.camera.fov += (wantFov - this.camera.fov) * Math.min(1, dt * 4);
+      this.camera.updateProjectionMatrix();
+    }
     const scripted = this.player.state === 'rest' ? { yaw: this.player.yaw + 0.9, pitch: 0.15, dist: 3.6 } : undefined;
     const look = this.mode === 'play' && this.player.alive ? this.input : null;
     this.camRig.update(dt, this.player, this.player.target, look, this.world.collision, scripted);
@@ -896,6 +905,7 @@ export class Game {
 
   private updateHudWorld(dt: number): void {
     const p = this.player;
+    this.hud.setHint(this.mode === 'play' && !this.input.pointerLocked && !this.input.usingGamepad);
     this.hud.setVitals(p.hp, p.maxHp, p.stamina, p.maxStamina);
     this.hud.setFlasks(p.flasks);
     const w = window.innerWidth, h = window.innerHeight;

@@ -44,6 +44,7 @@ export interface EnemySpawn {
   x: number;
   z: number;
   yaw: number;
+  dormant?: boolean;
 }
 
 interface Torch {
@@ -159,7 +160,7 @@ export class World {
     scene.add(this.sky);
 
     // Lighting
-    const hemi = new THREE.HemisphereLight(0x7a8496, 0x2a2018, 0.75);
+    const hemi = new THREE.HemisphereLight(0x8a94a8, 0x302418, 0.95);
     scene.add(hemi);
     const amb = new THREE.AmbientLight(0x3a3036, 0.35);
     scene.add(amb);
@@ -627,10 +628,11 @@ export class World {
 
     this.spawns.push(
       { kind: 'hollow', x: -8, z: -19, yaw: 0.3 },
-      { kind: 'hollow', x: 9, z: -23, yaw: -0.5 },
+      { kind: 'hollow', x: 9, z: -23, yaw: -0.5, dormant: true },
       { kind: 'spearman', x: -14, z: -34, yaw: 0.8 },
       { kind: 'hollow', x: 12, z: -41, yaw: 0 },
-      { kind: 'hollow', x: -7, z: -48, yaw: 0.4 },
+      { kind: 'hollow', x: -7, z: -48, yaw: 0.4, dormant: true },
+      { kind: 'hollow', x: -21, z: -46, yaw: 1.4, dormant: true },
       { kind: 'spearman', x: 18, z: -28, yaw: -1.2 },
       { kind: 'brute', x: 0, z: -51, yaw: 0 },
     );

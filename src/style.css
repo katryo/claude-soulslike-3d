@@ -139,6 +139,10 @@ html, body {
   background: radial-gradient(ellipse at center, transparent 50%, rgba(130, 0, 0, 0.55) 100%);
 }
 .fade { position: absolute; inset: 0; background: #000; opacity: 0; }
+.hint {
+  position: absolute; left: 50%; top: 14px; transform: translateX(-50%); opacity: 0; transition: opacity 0.4s;
+  font-size: 15px; letter-spacing: 0.08em; color: #b8ad98; padding: 4px 16px; background: rgba(0, 0, 0, 0.55);
+}
 
 /* ---- Menu ---- */
 .menu {
